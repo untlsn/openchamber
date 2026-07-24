@@ -263,11 +263,10 @@ export const getElectronPlatform = (): string | null => {
 /** Default side for in-app window controls (Windows-style, right). */
 export const DEFAULT_DESKTOP_WINDOW_CONTROLS_POSITION: DesktopWindowControlsPosition = 'right';
 
-/** Windows and Linux use frameless windows with in-app minimize/maximize/close controls. */
+/** Windows uses frameless windows with in-app minimize/maximize/close controls. */
 export const usesFramelessElectronChrome = (): boolean => {
   if (!isElectronShell()) return false;
-  const platform = getElectronPlatform();
-  return platform === 'win32' || platform === 'linux';
+  return getElectronPlatform() === 'win32';
 };
 
 /** Normalize a stored preference; legacy `auto` maps to the right-side default. */

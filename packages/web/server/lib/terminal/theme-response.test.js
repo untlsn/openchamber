@@ -44,4 +44,16 @@ describe('terminal theme responses', () => {
       '\u001b]10;rgb:1b1b/1b1b/1b1b\u001b\\',
     ]);
   });
+
+  test('answers a primary device attributes query split across PTY output chunks', () => {
+    const first = consumeTerminalThemeQueries('', '\u001b[0', lightAppearance);
+    const second = consumeTerminalThemeQueries(first.pending, 'c', { ...lightAppearance, modeEnabled: first.modeEnabled });
+    expect(first.responses).toEqual([]);
+    expect(first.pending).toBe('\u001b[0');
+    expect(second).toEqual({
+      pending: '',
+      modeEnabled: false,
+      responses: ['\u001b[?1;2c'],
+    });
+  });
 });

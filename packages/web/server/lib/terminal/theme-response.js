@@ -1,12 +1,13 @@
 const MODE_SET = '\u001b[?2031h';
 const MODE_RESET = '\u001b[?2031l';
 const CAPABILITY_QUERY = '\u001b[?2031$p';
+const PRIMARY_DEVICE_ATTRIBUTES_QUERY = '\u001b[0c';
 const MODE_QUERIES = ['\u001b[?996n', '\u001b[?997n'];
 const OSC_QUERIES = [10, 11].flatMap((code) => [
   { sequence: `\u001b]${code};?\u0007`, code },
   { sequence: `\u001b]${code};?\u001b\\`, code },
 ]);
-const CONTROL_SEQUENCES = [MODE_SET, MODE_RESET, CAPABILITY_QUERY, ...MODE_QUERIES, ...OSC_QUERIES.map(({ sequence }) => sequence)];
+const CONTROL_SEQUENCES = [MODE_SET, MODE_RESET, CAPABILITY_QUERY, PRIMARY_DEVICE_ATTRIBUTES_QUERY, ...MODE_QUERIES, ...OSC_QUERIES.map(({ sequence }) => sequence)];
 
 const parseColor = (value) => {
   if (typeof value !== 'string') return null;
@@ -48,6 +49,11 @@ export const consumeTerminalThemeQueries = (pending, data, appearance) => {
     if (input.startsWith(CAPABILITY_QUERY, index)) {
       responses.push(`\u001b[?2031;${modeEnabled ? 1 : 2}$y`);
       index += CAPABILITY_QUERY.length - 1;
+      continue;
+    }
+    if (input.startsWith(PRIMARY_DEVICE_ATTRIBUTES_QUERY, index)) {
+      responses.push('\u001b[?1;2c');
+      index += PRIMARY_DEVICE_ATTRIBUTES_QUERY.length - 1;
       continue;
     }
     const modeQuery = MODE_QUERIES.find((query) => input.startsWith(query, index));

@@ -14,7 +14,7 @@
 - Attach registers before capturing the snapshot, buffers concurrent events, drops events represented by the snapshot sequence, then enters live delivery.
 - `write` always includes the terminal ID; sockets never have mutable single-terminal binding state.
 - `detach` removes only that attachment.
-- Creation carries the active UI appearance. The PTY sets `COLORFGBG` and answers OSC 10, OSC 11, and Mode 2031 queries immediately, including queries emitted before a WebSocket attachment exists. Subscribed TUIs receive a Mode 2031 notification when the appearance changes.
+- Creation carries the active UI appearance. The PTY sets `COLORFGBG` and answers primary device attribute, OSC 10, OSC 11, and Mode 2031 queries immediately, including queries emitted before a WebSocket attachment exists. Subscribed TUIs receive a Mode 2031 notification when the appearance changes.
 
 HTTP remains the authenticated command plane for create, resize, appearance updates, restart, close, and force-kill. There is no SSE output or HTTP input compatibility path.
 

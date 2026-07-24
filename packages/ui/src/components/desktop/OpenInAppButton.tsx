@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from '@/components/ui';
 import { Icon } from "@/components/icon/Icon";
+import type { IconName } from '@/components/icon/icons';
 import { copyTextToClipboard } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
 import { isDesktopLocalOriginActive, isDesktopShell, openDesktopPath, openDesktopProjectInApp } from '@/lib/desktop';
@@ -20,6 +21,7 @@ const TERMINAL_DEFAULT_ICON_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSU
 
 type OpenInAppOptionWithFallback = OpenInAppOption & {
   fallbackIconDataUrl?: string;
+  fallbackIconName?: IconName;
 };
 
 const withFallbackIcon = (app: OpenInAppOption): OpenInAppOptionWithFallback => ({
@@ -27,7 +29,10 @@ const withFallbackIcon = (app: OpenInAppOption): OpenInAppOptionWithFallback => 
   fallbackIconDataUrl: app.id === 'finder' && window.__OPENCHAMBER_PLATFORM__ === 'darwin'
     ? FINDER_DEFAULT_ICON_DATA_URL
     : app.id === 'terminal'
-    ? TERMINAL_DEFAULT_ICON_DATA_URL
+      ? TERMINAL_DEFAULT_ICON_DATA_URL
+      : undefined,
+  fallbackIconName: app.id === 'finder' && window.__OPENCHAMBER_PLATFORM__ === 'linux'
+    ? 'folder-open-fill'
     : undefined,
 });
 
@@ -35,10 +40,12 @@ const AppIcon = ({
   label,
   iconDataUrl,
   fallbackIconDataUrl,
+  fallbackIconName,
 }: {
   label: string;
   iconDataUrl?: string;
   fallbackIconDataUrl?: string;
+  fallbackIconName?: IconName;
 }) => {
   const [failed, setFailed] = React.useState(false);
   const initial = label.trim().slice(0, 1).toUpperCase() || '?';
@@ -54,6 +61,10 @@ const AppIcon = ({
         onError={() => setFailed(true)}
       />
     );
+  }
+
+  if (fallbackIconName) {
+    return <Icon name={fallbackIconName} className="h-4 w-4 text-muted-foreground" />;
   }
 
   return (
@@ -152,6 +163,7 @@ export const OpenInAppButton = ({ directory, className }: OpenInAppButtonProps) 
           label={selectedApp.label}
           iconDataUrl={selectedApp.iconDataUrl}
           fallbackIconDataUrl={selectedApp.fallbackIconDataUrl}
+          fallbackIconName={selectedApp.fallbackIconName}
         />
       </button>
       <DropdownMenu>
@@ -189,6 +201,7 @@ export const OpenInAppButton = ({ directory, className }: OpenInAppButtonProps) 
                   label={app.label}
                   iconDataUrl={app.iconDataUrl}
                   fallbackIconDataUrl={appWithFallback.fallbackIconDataUrl}
+                  fallbackIconName={appWithFallback.fallbackIconName}
                 />
                 <span className="typography-ui-label text-foreground">{app.label}</span>
                 {selectedApp.id === app.id ? (
