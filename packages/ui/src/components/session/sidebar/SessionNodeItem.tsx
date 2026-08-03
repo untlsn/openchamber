@@ -22,7 +22,7 @@ import { isSessionPinned, type SessionPinnedTarget } from '@/stores/useSessionPi
 import { Icon } from "@/components/icon/Icon";
 import { buildExportFilename, downloadAsMarkdown, formatSessionAsMarkdown, getExportRevealLabelKey, revealExportedMarkdown, saveAsMarkdownDesktop } from '@/lib/exportSession';
 import type { ChildSessionExport } from '@/lib/exportSession';
-import { buildSessionMessageRecordsSnapshot, useDirectoryStore, useGlobalSessionStatus, useSessionPermissions } from '@/sync/sync-context';
+import { buildSessionMessageRecordsSnapshot, useDirectoryStore, useGlobalSessionStatus, useSessionPermissions, useSessionQuestions } from '@/sync/sync-context';
 import { useSync } from '@/sync/use-sync';
 import { useViewportStore, viewportSessionKey } from '@/sync/viewport-store';
 import { DraggableSessionRow } from './sessionFolderDnd';
@@ -447,6 +447,7 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
   const sessionStatus = useGlobalSessionStatus(session.id);
   const isMovingToWorktree = useIsSessionWorktreeMovePending(session.id);
   const sessionPermissions = useSessionPermissions(session.id, sessionDirectory ?? undefined, { bootstrap: false });
+  const sessionQuestions = useSessionQuestions(session.id, sessionDirectory ?? undefined);
   const sessionGoal = getSessionGoal(resolvedSession);
   const sessionGoalGlyph = sessionGoal ? (
     <span
@@ -677,9 +678,12 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
 
   const statusType = sessionStatus?.type ?? 'idle';
   const isStreaming = statusType === 'busy' || statusType === 'retry';
+  const isWaitingForAnswer = sessionQuestions.length > 0;
   const pendingPermissionCount = sessionPermissions.length;
   const showUnreadStatus = !isMovingToWorktree && !isStreaming && needsAttention && !isActive;
   const showStatusMarker = isStreaming || showUnreadStatus;
+  const showLifecycleLabel = isWaitingForAnswer || showStatusMarker;
+  const showLeadingStatusMarker = showStatusMarker && !showExpandedSessionLayout;
   const statusMarkerContent = isStreaming
     ? (
         <Icon
@@ -695,8 +699,8 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
           title={t('sessions.sidebar.session.status.unread')}
         />
       );
-  const hideLeadingIndicatorOnHover = !alwaysShowActions && hasChildren && (isMovingToWorktree || showStatusMarker || isPinnedSession);
-  const showPinnedMarker = isPinnedSession && !isMovingToWorktree && !showStatusMarker;
+  const hideLeadingIndicatorOnHover = !alwaysShowActions && hasChildren && (isMovingToWorktree || showLeadingStatusMarker || isPinnedSession);
+  const showPinnedMarker = isPinnedSession && !isMovingToWorktree && !showLeadingStatusMarker;
   const pinnedMarkerContent = (
     <Icon
       name="pushpin"
@@ -704,7 +708,7 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
       aria-label={t('sessions.sidebar.session.status.pinned')}
     />
   );
-  const leadingIndicators = isMovingToWorktree || showStatusMarker || showPinnedMarker ? (
+  const leadingIndicators = isMovingToWorktree || showLeadingStatusMarker || showPinnedMarker ? (
     <span
       style={{ left: ROW_GUTTER_LEFT_PX + depth * ROW_DEPTH_STEP_PX }}
       className={cn(
@@ -718,10 +722,10 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
           className="h-3 w-3 animate-spin text-primary"
           aria-label={t('sessions.sidebar.session.status.movingToWorktree')}
         />
-      ) : showStatusMarker ? statusMarkerContent : showPinnedMarker ? pinnedMarkerContent : null}
+      ) : showLeadingStatusMarker ? statusMarkerContent : showPinnedMarker ? pinnedMarkerContent : null}
     </span>
   ) : null;
-  const hideChevronUntilHover = hasChildren && !alwaysShowActions && (isMovingToWorktree || showStatusMarker || isPinnedSession);
+  const hideChevronUntilHover = hasChildren && !alwaysShowActions && (isMovingToWorktree || showLeadingStatusMarker || isPinnedSession);
   const subsessionChevron = hasChildren ? (
     <span
       role="button"
@@ -1226,8 +1230,7 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
                   >
                     {showExpandedSessionLayout ? (
                       <div className={cn(
-                        'flex w-full min-w-0 items-center gap-1.5 text-muted-foreground/75',
-                        showInlineBranchMarker && 'pr-12',
+                        'flex w-full min-w-0 items-center gap-1.5 pr-18 text-muted-foreground/75',
                       )}>
                         <span className="flex min-w-0 items-center gap-1.5 [&>span:last-child]:text-xs [&>span:last-child]:font-normal [&>span:last-child]:normal-case [&>span:last-child]:text-muted-foreground/75">
                           {projectFromStore ? (
@@ -1356,20 +1359,39 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
             </div>
           ) : null}
 
-          {showExpandedSessionLayout && showInlineBranchMarker ? (
-            <Button
-              type="button"
-              variant="secondary"
-              size="xs"
-              className="pointer-events-none absolute right-0 top-1 z-10 border border-border/60 bg-interactive-hover/60 text-xs text-foreground/80 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 hover:bg-interactive-hover hover:text-foreground"
-              aria-label="sattle"
-              onPointerDown={(event) => event.stopPropagation()}
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <Icon name="check" className="size-2.5" />
-              sattle
-            </Button>
+          {showExpandedSessionLayout ? (
+            <>
+              {showLifecycleLabel ? (
+                <span className={cn(
+                  'pointer-events-none absolute right-2 top-1 z-10 inline-flex h-6 items-center gap-1 text-xs transition-opacity group-hover:opacity-0 group-focus-within:opacity-0',
+                  isWaitingForAnswer
+                    ? 'animate-pulse text-status-success'
+                    : isStreaming
+                      ? 'text-primary'
+                      : 'text-foreground/70',
+                )}>
+                  {!isWaitingForAnswer && isStreaming ? <Icon name="loader-4" className="size-3 animate-spin" /> : null}
+                  {isWaitingForAnswer
+                    ? t('sessions.sidebar.session.status.waiting')
+                    : isStreaming
+                      ? t('sessions.sidebar.session.status.working')
+                      : t('sessions.sidebar.session.status.done')}
+                </span>
+              ) : null}
+              <Button
+                type="button"
+                variant="secondary"
+                size="xs"
+                className="pointer-events-none absolute right-2 top-1 z-10 border border-border/60 bg-interactive-hover/60 text-xs text-foreground/80 opacity-0 normal-case group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 hover:bg-interactive-hover hover:text-foreground"
+                aria-label={t('sessions.sidebar.session.status.settle')}
+                onPointerDown={(event) => event.stopPropagation()}
+                onMouseDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <Icon name="check" className="size-2.5" />
+                {t('sessions.sidebar.session.status.settle')}
+              </Button>
+            </>
           ) : null}
 
           <div className={cn(
