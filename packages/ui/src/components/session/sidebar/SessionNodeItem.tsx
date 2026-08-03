@@ -1384,9 +1384,9 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
                 size="xs"
                 className="pointer-events-none absolute right-2 top-1 z-10 border border-border/60 bg-interactive-hover/60 text-xs text-foreground/80 opacity-0 normal-case group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 hover:bg-interactive-hover hover:text-foreground"
                 aria-label={t('sessions.sidebar.session.status.settle')}
-                onPointerDown={(event) => event.stopPropagation()}
-                onMouseDown={(event) => event.stopPropagation()}
-                onClick={(event) => event.stopPropagation()}
+                onPointerDown={handleQuickArchivePointerDown}
+                onMouseDown={handleQuickArchiveMouseDown}
+                onClick={handleQuickArchiveClick}
               >
                 <Icon name="check" className="size-2.5" />
                 {t('sessions.sidebar.session.status.settle')}
