@@ -101,6 +101,7 @@ export const parseDesktopEntry = (content, filePath = '') => {
     rawExec,
     icon: String(values.get('Icon') || '').trim() || null,
     categories: String(values.get('Categories') || '').split(';').map((entry) => entry.trim()).filter(Boolean),
+    terminalDirectoryArg: String(values.get('X-TerminalArgDir') || '').trim() || null,
     filePath,
   };
 };
@@ -244,7 +245,17 @@ export const buildLinuxOpenSpecs = ({ targetPath, appId, appName, targetKind = '
     const terminalEntry = findEntry(entries, appId, appName);
     if (terminalEntry) {
       const spec = buildCommandFromDesktopExec(terminalEntry, directory);
-      if (spec) specs.push(spec);
+      if (spec) {
+        if (terminalEntry.terminalDirectoryArg && !/%[fFuU]/.test(terminalEntry.rawExec)) {
+          spec.args.pop();
+          if (terminalEntry.terminalDirectoryArg.endsWith('=')) {
+            spec.args.push(`${terminalEntry.terminalDirectoryArg}${directory}`);
+          } else {
+            spec.args.push(terminalEntry.terminalDirectoryArg, directory);
+          }
+        }
+        specs.push(spec);
+      }
     }
     specs.push({ program: 'xdg-terminal-exec', args: ['--working-directory', directory] });
     if (commandExists('gnome-terminal', env)) {

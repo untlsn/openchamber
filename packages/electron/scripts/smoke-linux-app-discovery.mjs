@@ -51,7 +51,7 @@ try {
   await fs.writeFile(path.join(userApps, 'nodisplay.desktop'), '[Desktop Entry]\nType=Application\nName=No Display App\nExec=nodisplay %f\nNoDisplay=true\n', 'utf8');
   await fs.writeFile(path.join(userApps, 'missing-name.desktop'), '[Desktop Entry]\nType=Application\nExec=missing %f\n', 'utf8');
   await fs.writeFile(path.join(userApps, 'missing-exec.desktop'), '[Desktop Entry]\nType=Application\nName=Missing Exec\nIcon=missing\n', 'utf8');
-  await fs.writeFile(path.join(systemApps, 'ghostty.desktop'), '[Desktop Entry]\nType=Application\nName=Ghostty\nExec=ghostty --working-directory=%f --open-uri=%u\nIcon=ghostty\n', 'utf8');
+  await fs.writeFile(path.join(systemApps, 'ghostty.desktop'), '[Desktop Entry]\nType=Application\nName=Ghostty\nExec=ghostty --gtk-single-instance=true\nIcon=ghostty\nX-TerminalArgDir=--working-directory=\n', 'utf8');
   await fs.writeFile(path.join(systemApps, 'plain.desktop'), '[Desktop Entry]\nType=Application\nName=Plain Editor\nExec=plain-editor --flag\nIcon=plain\n', 'utf8');
   await fs.writeFile(path.join(systemApps, 'thunar.desktop'), [
     '[Desktop Entry]',
@@ -92,7 +92,8 @@ try {
 
   const ghosttyEntry = entries.find((entry) => entry.name === 'Ghostty');
   const ghosttyCommand = buildCommandFromDesktopExec(ghosttyEntry, '/tmp/My Project');
-  assert(ghosttyCommand?.args.join('|') === '--working-directory=/tmp/My Project|--open-uri=/tmp/My Project', `embedded %f/%u should be substituted in place, got ${ghosttyCommand?.args.join('|')}`);
+  assert(ghosttyEntry?.terminalDirectoryArg === '--working-directory=', `terminal directory argument should be parsed, got ${ghosttyEntry?.terminalDirectoryArg}`);
+  assert(ghosttyCommand?.args.join('|') === '--gtk-single-instance=true|/tmp/My Project', `generic desktop command should append the target, got ${ghosttyCommand?.args.join('|')}`);
 
   const urlEntry = parseDesktopEntry('[Desktop Entry]\nType=Application\nName=URL Handler\nExec=url-handler --url %U\n', '/tmp/url.desktop');
   const urlCommand = buildCommandFromDesktopExec(urlEntry, 'file:///tmp/My%20Project');
@@ -143,7 +144,7 @@ try {
 
   const terminalFileSpecs = buildLinuxOpenSpecs({ targetPath: '/tmp/My Project/file.txt', appId: 'ghostty', appName: 'Ghostty', targetKind: 'file', entries, env });
   assert(terminalFileSpecs[0]?.program === 'ghostty', 'terminal desktop entry should be preferred when present');
-  assert(terminalFileSpecs[0]?.args.join('|') === '--working-directory=/tmp/My Project|--open-uri=/tmp/My Project', `terminal file target should use dirname, got ${terminalFileSpecs[0]?.args.join('|')}`);
+  assert(terminalFileSpecs[0]?.args.join('|') === '--gtk-single-instance=true|--working-directory=/tmp/My Project', `terminal file target should use the declared directory argument, got ${terminalFileSpecs[0]?.args.join('|')}`);
   assert(terminalFileSpecs[1]?.program === 'xdg-terminal-exec', 'terminal specs should include xdg-terminal-exec fallback after desktop entry');
   assert(terminalFileSpecs[1]?.args.join('|') === '--working-directory|/tmp/My Project', `terminal fallback should use file dirname, got ${terminalFileSpecs[1]?.args.join('|')}`);
 
