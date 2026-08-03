@@ -3,7 +3,7 @@
 ## Refactor result
 
 - `SessionSidebar.tsx` now acts mainly as orchestration; core logic moved to focused hooks/components.
-- Layout (web/desktop): top navigation (`SidebarNav`: New session, Scheduled, Multi-run, Archive), then the `recent` zone, then one zone per project with a **flat** session list. There is no rendered worktree grouping level.
+- Layout (web/desktop): `TitlebarLeftControls` places New session before the sidebar toggle in the desktop titlebar strip, followed by the compact action toolbar, the `recent` zone, then one zone per project with a **flat** session list. There is no rendered worktree grouping level.
 - **Two grouping display modes** (`useSessionDisplayStore.sessionGroupingMode`, toggled in the view dropdown): `'by-worktree'` (default) renders the worktree-grouped `sectionsForRender` with slim PR-aware branch sub-headers inside each project zone; `'flat'` renders `flatSectionsForRender` — one merged non-archived group per project (`id: 'flat'`, `folderScopes` listing every contributing scope) with per-row branch markers. Both derive from the same `projectSections` data layer, which alone feeds bootstrap demand planning and PR polling.
 - When sticky zone headers are enabled, project headers are sticky "zone" bands (`SortableProjectItem`); on a vibrant desktop the scrolling content fades behind an unmasked, non-interactive copy of the stuck icon/title without painting a background. The transparent fade zone blocks interaction with obscured rows. The `recent` section uses the same overlay while it is the leading sticky header. Collapsed projects show an aggregated busy/unseen indicator (`ProjectAggregateStatusIndicator`), derived from the live status index and notification store scoped to the project's directories.
 - Session rows have a single layout (former `minimal`); the `default`/`minimal` display mode was removed (`session-display-mode` store v4 migration drops the key). Rows show an inline branch label (from `node.worktree` or recent's `secondaryMeta`) when the session lives outside the project root, and bold titles while unread.
@@ -25,8 +25,8 @@
 
 ### Components
 
-- `SidebarHeader.tsx`: Top header UI for add-project, session search, selection mode, project sort, and the display menu (recent toggle, collapse/expand all).
-- `SidebarNav.tsx`: Text navigation rows above the tree (New session, Scheduled, Multi-run, Archive); hidden in VS Code.
+- `SidebarHeader.tsx`: Single compact menu, portaled into the desktop titlebar before the sidebar toggle, for project/surface actions, session search and selection, project sorting, grouping, recent visibility, and collapse/expand controls.
+- `SidebarNav.tsx`: Mobile new-session row; desktop owns the same action in `TitlebarLeftControls`; hidden in VS Code.
 - `SidebarActivitySections.tsx`: Global top section renderer; currently used for the `recent` section only, styled as a zone header.
 - `SidebarFooter.tsx`: Static footer with icon-only settings, shortcuts, and about actions.
 - `SidebarProjectsList.tsx`: Main scrollable renderer for project zones and their flat/archived groups plus empty/search states; owns project drag-to-reorder.

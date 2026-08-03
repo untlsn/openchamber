@@ -4,18 +4,18 @@ import { Icon } from '@/components/icon/Icon';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/useUIStore';
 import { useI18n } from '@/lib/i18n';
-import { useProjectActionsContext } from '@/hooks/useProjectActionsContext';
-import { ProjectActionsButton } from '@/components/layout/ProjectActionsButton';
 import { WindowsWindowControls } from '@/components/desktop/WindowsWindowControls';
 import { formatShortcutForDisplay, getEffectiveShortcutCombo } from '@/lib/shortcuts';
 import { invokeDesktop } from '@/lib/desktop';
 import { useDesktopWindowControlsLayout } from '@/hooks/useDesktopWindowControlsLayout';
+import { Button } from '@/components/ui/button';
+import { useSessionUIStore } from '@/sync/session-ui-store';
 
 const ICON_BUTTON_CLASS =
   'app-region-no-drag inline-flex h-8 w-8 items-center justify-center gap-2 rounded-md typography-ui-label font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-interactive-hover transition-colors';
 
 /**
- * Persistent top-left titlebar controls (sidebar toggle + project actions).
+ * Persistent top-left titlebar controls.
  *
  * Rendered exactly once as an absolutely-positioned overlay above both the
  * sidebar and the header, so the buttons never migrate / re-mount between the
@@ -29,12 +29,21 @@ export const TitlebarLeftControls: React.FC = () => {
   const { t } = useI18n();
   const toggleSidebar = useUIStore((state) => state.toggleSidebar);
   const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
+  const sidebarWidth = useUIStore((state) => state.sidebarWidth);
   const shortcutOverrides = useUIStore((state) => state.shortcutOverrides);
-  const projectActionsContext = useProjectActionsContext();
+  const openNewSessionDraft = useSessionUIStore((state) => state.openNewSessionDraft);
   const clusterRef = React.useRef<HTMLDivElement | null>(null);
 
   const toggleShortcut = formatShortcutForDisplay(getEffectiveShortcutCombo('toggle_sidebar', shortcutOverrides));
   const { usesFramelessChrome, side: windowControlsSide } = useDesktopWindowControlsLayout();
+  const openSidebarWidth = Math.min(500, Math.max(280, sidebarWidth || 280));
+
+  const handleNewSession = React.useCallback(() => {
+    const ui = useUIStore.getState();
+    ui.closeMainSurfaces();
+    ui.setActiveMainTab('chat');
+    openNewSessionDraft();
+  }, [openNewSessionDraft]);
 
   const handleOpenWindowsAppMenu = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -84,9 +93,10 @@ export const TitlebarLeftControls: React.FC = () => {
       style={{
         height: 'var(--oc-header-height, 3rem)',
         paddingLeft: 'var(--oc-titlebar-left-inset, 0.75rem)',
+        width: isSidebarOpen ? `${openSidebarWidth}px` : undefined,
       }}
     >
-      <div ref={clusterRef} className="flex items-center gap-2">
+      <div ref={clusterRef} className={cn('flex items-center gap-2', isSidebarOpen && 'min-w-0 flex-1')}>
         {usesFramelessChrome && windowControlsSide === 'left' ? (
           <WindowsWindowControls visible position="left" />
         ) : null}
@@ -109,13 +119,31 @@ export const TitlebarLeftControls: React.FC = () => {
           </Tooltip>
         ) : null}
 
+        {isSidebarOpen ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleNewSession}
+            className="min-w-0 flex-1 justify-start normal-case font-normal text-muted-foreground hover:text-foreground"
+          >
+            <Icon name="chat-new" className="size-4" />
+            {t('sessions.sidebar.header.actions.newSession')}
+          </Button>
+        ) : null}
+
+        <span
+          id="sidebar-titlebar-menu-slot"
+          className={cn('shrink-0', isSidebarOpen ? 'inline-flex' : 'hidden')}
+        />
+
         <Tooltip>
           <TooltipTrigger asChild>
             <button
               type="button"
               onClick={toggleSidebar}
               aria-label={t('header.actions.openSessionsAria')}
-              className={cn(ICON_BUTTON_CLASS, 'shrink-0')}
+              className={cn(ICON_BUTTON_CLASS, 'shrink-0', isSidebarOpen && 'ml-auto')}
             >
               <Icon name="layout-left" className="h-[18px] w-[18px]" />
             </button>
@@ -124,17 +152,6 @@ export const TitlebarLeftControls: React.FC = () => {
             <p>{t('header.actions.openSessionsWithShortcut', { shortcut: toggleShortcut })}</p>
           </TooltipContent>
         </Tooltip>
-
-        {projectActionsContext ? (
-          <ProjectActionsButton
-            projectRef={projectActionsContext.projectRef}
-            directory={projectActionsContext.directory}
-            // While the sidebar is open the controls sit over the frosted
-            // sidebar — let the pill share its translucency instead of painting
-            // an opaque surface (handled under [data-oc-vibrancy] in CSS).
-            className={isSidebarOpen ? 'oc-vibrancy-pill' : undefined}
-          />
-        ) : null}
       </div>
     </div>
   );

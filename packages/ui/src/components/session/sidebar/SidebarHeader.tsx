@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,115 +71,20 @@ export function SidebarHeader(props: Props): React.ReactNode {
   const setSessionGroupingMode = useSessionDisplayStore((state) => state.setSessionGroupingMode);
   const stickyZoneHeaders = useSessionDisplayStore((state) => state.stickyZoneHeaders);
   const toggleStickyZoneHeaders = useSessionDisplayStore((state) => state.toggleStickyZoneHeaders);
+  const [titlebarMenuTarget, setTitlebarMenuTarget] = React.useState<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    setTitlebarMenuTarget(document.getElementById('sidebar-titlebar-menu-slot'));
+  }, []);
 
   if (hideDirectoryControls) {
     return null;
   }
 
   return (
-    <div className="select-none flex-shrink-0 px-2.5 py-1">
-      <div className="flex h-auto min-h-8 flex-col gap-1">
-        <div className="flex h-8 items-center justify-between gap-2">
-          {/* Quiet toolbar under the New-session CTA: project/surface entry
-              points at left, list controls at right. ml-[3px] compensates the
-              icon inset inside the 24px buttons so the first glyph lines up
-              with the New-session icon above (16px from the sidebar edge). */}
-          <div className="ml-[3px] flex items-center gap-1.5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={handleOpenDirectoryDialog}
-                  className={cn(headerActionButtonClass, 'text-muted-foreground hover:text-foreground hover:bg-transparent')}
-                  aria-label={t('sessions.sidebar.header.actions.addProject')}
-                >
-                  <Icon name="folder-add" className={headerActionIconClass} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.actions.addProject')}</p></TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={onOpenScheduled}
-                  className={cn(headerActionButtonClass, 'text-muted-foreground hover:text-foreground hover:bg-transparent')}
-                  aria-label={t('sessions.sidebar.header.actions.scheduledTasks')}
-                >
-                  <Icon name="calendar-schedule" className={headerActionIconClass} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.actions.scheduledTasks')}</p></TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={onOpenMultiRun}
-                  className={cn(headerActionButtonClass, 'text-muted-foreground hover:text-foreground hover:bg-transparent')}
-                  aria-label={t('sessions.sidebar.header.actions.newMultiRun')}
-                  disabled={!canOpenMultiRun}
-                >
-                  <ArrowsMerge className={headerActionIconClass} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.actions.newMultiRun')}</p></TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={onOpenArchive}
-                  className={cn(headerActionButtonClass, 'text-muted-foreground hover:text-foreground hover:bg-transparent')}
-                  aria-label={t('sessions.sidebar.nav.archive')}
-                >
-                  <Icon name="archive" className={headerActionIconClass} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.nav.archive')}</p></TooltipContent>
-            </Tooltip>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => setIsSessionSearchOpen((prev) => !prev)}
-                  className={cn(headerActionButtonClass, 'text-muted-foreground hover:text-foreground hover:bg-transparent')}
-                  aria-label={t('sessions.sidebar.header.actions.searchSessions')}
-                  aria-expanded={isSessionSearchOpen}
-                >
-                  <Icon name="search" className={headerActionIconClass} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.actions.searchSessions')}</p></TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={onToggleSelectionMode}
-                  className={cn(headerActionButtonClass, 'text-muted-foreground hover:text-foreground hover:bg-transparent', selectionModeEnabled && 'bg-interactive-hover text-primary')}
-                  aria-label={selectionModeEnabled
-                    ? t('sessions.sidebar.header.actions.exitSelection')
-                    : t('sessions.sidebar.header.actions.selectSessions')}
-                  aria-pressed={selectionModeEnabled}
-                >
-                  <Icon name="checkbox-multiple" className={headerActionIconClass} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}>
-                <p>{selectionModeEnabled
-                  ? t('sessions.sidebar.header.actions.exitSelection')
-                  : t('sessions.sidebar.header.actions.selectSessions')}</p>
-              </TooltipContent>
-            </Tooltip>
-
+    <>
+      {titlebarMenuTarget ? createPortal(
+        <div className="inline-flex">
             <DropdownMenu>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -195,6 +101,40 @@ export function SidebarHeader(props: Props): React.ReactNode {
                 <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.displayMode.label')}</p></TooltipContent>
               </Tooltip>
               <DropdownMenuContent align="end" className="min-w-[180px]">
+                <DropdownMenuItem onClick={handleOpenDirectoryDialog} className="flex items-center gap-2">
+                  <Icon name="folder-add" className="h-4 w-4" />
+                  <span>{t('sessions.sidebar.header.actions.addProject')}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onOpenScheduled} className="flex items-center gap-2">
+                  <Icon name="calendar-schedule" className="h-4 w-4" />
+                  <span>{t('sessions.sidebar.header.actions.scheduledTasks')}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onOpenMultiRun} disabled={!canOpenMultiRun} className="flex items-center gap-2">
+                  <ArrowsMerge className="h-4 w-4" />
+                  <span>{t('sessions.sidebar.header.actions.newMultiRun')}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onOpenArchive} className="flex items-center gap-2">
+                  <Icon name="archive" className="h-4 w-4" />
+                  <span>{t('sessions.sidebar.nav.archive')}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setIsSessionSearchOpen((prev) => !prev)} className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2">
+                    <Icon name="search" className="h-4 w-4" />
+                    {t('sessions.sidebar.header.actions.searchSessions')}
+                  </span>
+                  {isSessionSearchOpen ? <Icon name="check" className="h-4 w-4 text-primary" /> : null}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onToggleSelectionMode} className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2">
+                    <Icon name="checkbox-multiple" className="h-4 w-4" />
+                    {selectionModeEnabled
+                      ? t('sessions.sidebar.header.actions.exitSelection')
+                      : t('sessions.sidebar.header.actions.selectSessions')}
+                  </span>
+                  {selectionModeEnabled ? <Icon name="check" className="h-4 w-4 text-primary" /> : null}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuLabel>{t('sessions.sidebar.header.actions.sortProjects')}</DropdownMenuLabel>
                 {([
                   ['manual', 'sessions.sidebar.header.projectSort.manual'],
@@ -255,11 +195,13 @@ export function SidebarHeader(props: Props): React.ReactNode {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-        </div>
+        </div>,
+        titlebarMenuTarget,
+      ) : null}
 
-        {isSessionSearchOpen ? (
-          <div className="pb-1">
+      {isSessionSearchOpen ? (
+        <div className="select-none flex-shrink-0 px-2.5 py-1">
+          <div className="pb-1 pt-1">
             <div className="mb-1 flex items-center justify-between px-0.5 typography-micro text-muted-foreground/80">
               {hasSessionSearchQuery ? (
                 <span>{searchMatchCount === 1
@@ -299,8 +241,8 @@ export function SidebarHeader(props: Props): React.ReactNode {
               ) : null}
             </div>
           </div>
-        ) : null}
-      </div>
-    </div>
+        </div>
+      ) : null}
+    </>
   );
 }

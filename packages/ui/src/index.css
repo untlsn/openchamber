@@ -39,6 +39,21 @@ button,
   -webkit-user-select: none !important;
 }
 
+/* Composer CodeMirror views survive HMR and session keep-alive. Keep this
+   focus affordance outside the one-time editor theme so already-mounted views
+   reveal the caret without waiting for a view rebuild. */
+.composer-editor .cm-editor.cm-focused .cm-placeholder {
+  visibility: hidden;
+}
+
+/* CodeMirror's empty document keeps a placeholder widget at the caret origin.
+   Even hidden, that widget leaves the stock 1px cursor visually fragile. Make
+   only the focused empty caret explicit; normal typed-text carets stay intact. */
+.composer-editor .cm-editor.cm-focused:has(.cm-placeholder) .cm-cursor {
+  border-left-color: var(--surface-foreground) !important;
+  border-left-width: 2px !important;
+}
+
 :root.oc-theme-switching *,
 :root.oc-theme-switching *::before,
 :root.oc-theme-switching *::after {

@@ -83,6 +83,14 @@ describe('composerEditorTheme', () => {
         expect(tokens.filter((token) => /[A-Z]/.test(token))).toEqual([]);
     });
 
+    test('the focused empty editor hides its placeholder so the caret remains visible', () => {
+        const focusedPlaceholderRule = selectors.find((selector) =>
+            selector.includes('.cm-focused') && selector.includes('.cm-placeholder'));
+        expect(focusedPlaceholderRule).toBeDefined();
+        const rule = (COMPOSER_EDITOR_THEME_SPEC as Record<string, Record<string, string>>)[focusedPlaceholderRule!];
+        expect(rule.visibility).toBe('hidden');
+    });
+
     test('the selection is translucent so token colours survive it', () => {
         const rules = selectors
             .filter((selector) => selector.includes('.cm-selectionBackground'))

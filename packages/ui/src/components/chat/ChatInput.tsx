@@ -2103,6 +2103,16 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({ onOpenSettings, scrollTo
         }
     };
 
+    const handleComposerPanelMouseDown = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+        if (event.button !== 0 || (!currentSessionId && !newSessionDraftOpen)) return;
+        const target = event.target as HTMLElement | null;
+        if (target?.closest('button, a, input, textarea, select, [contenteditable="true"], [role="button"], [role="menuitem"], [data-chat-input="true"]')) {
+            return;
+        }
+        event.preventDefault();
+        composerRef.current?.focus();
+    }, [currentSessionId, newSessionDraftOpen]);
+
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const attachFiles = React.useCallback(async (files: FileList | File[]) => {
@@ -2539,6 +2549,7 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({ onOpenSettings, scrollTo
                         backgroundColor: currentTheme?.colors?.surface?.subtle,
                     }}
                     ref={dropZoneRef}
+                    onMouseDown={handleComposerPanelMouseDown}
                     onDropCapture={handleDropCapture}
                     onDragEnter={handleDragEnter}
                     onDragOver={handleDragOver}

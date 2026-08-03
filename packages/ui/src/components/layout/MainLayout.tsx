@@ -406,7 +406,7 @@ export const MainLayout: React.FC = () => {
                 </DrawerProvider>
             ) : (
                 <>
-                    {/* Persistent top-left controls (toggle + project actions) that
+                    {/* Persistent top-left controls that
                         stay put while the sidebar/header animate beneath them. */}
                     <TitlebarLeftControls />
                     {/* Desktop: full-height Sidebar beside [Header above (chat | RightSidebar)] */}

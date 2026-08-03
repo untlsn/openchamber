@@ -1823,7 +1823,7 @@ const SessionSidebarComponent: React.FC<SessionSidebarProps> = ({
         recentSessions={recentSessions}
         prefetchSession={sync.prefetchSession}
       />
-      {!hideDirectoryControls && !isVSCode ? (
+      {!hideDirectoryControls && !isVSCode && mobileVariant ? (
         <SidebarNav onNewSession={handleOpenNewSessionDraftFromHeader} />
       ) : null}
 

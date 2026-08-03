@@ -56,6 +56,10 @@ export const COMPOSER_EDITOR_THEME_SPEC = {
     // `color` inherits, the placeholder silently renders at full text
     // brightness instead.
     '.cm-placeholder': { color: 'var(--surface-muted-foreground)' },
+    // On an empty focused editor the placeholder begins at the exact caret
+    // position and visually swallows the 1px drawn cursor. Once the user has
+    // clicked into the composer, prefer the typing affordance over the hint.
+    '&.cm-focused .cm-placeholder': { visibility: 'hidden' },
     // `drawSelection()` paints its own selection layer, and CodeMirror styles
     // it for the focused editor through
     // `&light.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground`
