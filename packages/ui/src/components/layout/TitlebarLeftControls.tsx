@@ -10,6 +10,7 @@ import { invokeDesktop } from '@/lib/desktop';
 import { useDesktopWindowControlsLayout } from '@/hooks/useDesktopWindowControlsLayout';
 import { Button } from '@/components/ui/button';
 import { useSessionUIStore } from '@/sync/session-ui-store';
+import { useProjectsStore } from '@/stores/useProjectsStore';
 
 const ICON_BUTTON_CLASS =
   'app-region-no-drag inline-flex h-8 w-8 items-center justify-center gap-2 rounded-md typography-ui-label font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-interactive-hover transition-colors';
@@ -42,7 +43,11 @@ export const TitlebarLeftControls: React.FC = () => {
     const ui = useUIStore.getState();
     ui.closeMainSurfaces();
     ui.setActiveMainTab('chat');
-    openNewSessionDraft();
+    const currentSessionDirectory = useSessionUIStore.getState().currentSessionDirectory;
+    const activeProjectId = useProjectsStore.getState().activeProjectId;
+    openNewSessionDraft(currentSessionDirectory
+      ? { selectedProjectId: activeProjectId, directoryOverride: currentSessionDirectory }
+      : undefined);
   }, [openNewSessionDraft]);
 
   const handleOpenWindowsAppMenu = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
