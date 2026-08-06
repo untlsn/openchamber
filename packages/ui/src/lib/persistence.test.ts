@@ -389,6 +389,26 @@ describe('updateDesktopSettings', () => {
     expect(useMessageQueueStore.getState().followUpBehavior).toBe('queue');
   });
 
+  test('keeps user message collapsing disabled when persisted settings enable it', async () => {
+    getWindow();
+    useUIStore.setState({ collapsibleUserMessages: true });
+    switchRuntimeEndpoint({ apiBaseUrl: 'https://expanded-prompts.example', runtimeKey: 'expanded-prompts' });
+    registerSettingsApi(async () => ({}), async () => ({
+      settings: {
+        collapsibleUserMessages: true,
+        draftStartersCraftGoalAdded: true,
+        draftStartersScheduleTaskAdded: true,
+      },
+      source: 'web',
+    }));
+
+    await syncDesktopSettings();
+
+    expect(useUIStore.getState().collapsibleUserMessages).toBe(false);
+    useUIStore.getState().setCollapsibleUserMessages(true);
+    expect(useUIStore.getState().collapsibleUserMessages).toBe(false);
+  });
+
   test('treats settings save responses as partial patches', async () => {
     getWindow();
     localStorage.setItem('selectedThemeId', 'existing-theme');

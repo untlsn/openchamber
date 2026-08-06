@@ -1013,7 +1013,7 @@ export const useUIStore = create<UIStore>()(
         desktopWindowControlsStyle: 'classic',
         mermaidRenderingMode: 'svg',
         userMessageRenderingMode: 'markdown',
-        collapsibleUserMessages: true,
+        collapsibleUserMessages: false,
         stickyUserHeader: false,
         promptNavigatorEnabled: true,
         expandedEditorToolbar: false,
@@ -2190,8 +2190,8 @@ export const useUIStore = create<UIStore>()(
         setUserMessageRenderingMode: (value) => {
           set({ userMessageRenderingMode: value });
         },
-        setCollapsibleUserMessages: (value) => {
-          set({ collapsibleUserMessages: value });
+        setCollapsibleUserMessages: () => {
+          set({ collapsibleUserMessages: false });
         },
         setStickyUserHeader: (value) => {
           set({ stickyUserHeader: value });
@@ -2253,12 +2253,17 @@ export const useUIStore = create<UIStore>()(
       {
         name: 'ui-store',
         storage: createDeferredSafeJSONStorage(),
-        version: 13,
+        version: 14,
         migrate: (persistedState, version) => {
           if (!persistedState || typeof persistedState !== 'object') {
             return persistedState;
           }
           const state = persistedState as Record<string, unknown>;
+
+          // v13 -> v14: user messages must remain fully expanded.
+          if (version < 14) {
+            state.collapsibleUserMessages = false;
+          }
 
           // v12 -> v13: promote FilesView localStorage autosave toggle into the store.
           if (version < 13) {

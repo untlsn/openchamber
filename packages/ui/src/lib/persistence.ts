@@ -787,8 +787,8 @@ const applyDesktopUiPreferences = (settings: DesktopSettings) => {
       store.setUserMessageRenderingMode(settings.userMessageRenderingMode);
     }
   }
-  if (typeof settings.collapsibleUserMessages === 'boolean' && settings.collapsibleUserMessages !== store.collapsibleUserMessages) {
-    store.setCollapsibleUserMessages(settings.collapsibleUserMessages);
+  if (store.collapsibleUserMessages) {
+    store.setCollapsibleUserMessages(false);
   }
   if (typeof settings.messageStreamTransport === 'string'
     && (settings.messageStreamTransport === 'auto' || settings.messageStreamTransport === 'ws' || settings.messageStreamTransport === 'sse')) {
