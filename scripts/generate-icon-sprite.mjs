@@ -18,6 +18,11 @@ const remixPath = resolve(repoRoot, "node_modules/@remixicon/react/index.mjs")
 const outPath = resolve(repoRoot, "packages/ui/src/components/icon/sprite.ts")
 
 const customIconData = new Map([
+  // MingCute route-line: https://github.com/Richard9394/MingCute (Apache-2.0)
+  [
+    "project-root",
+    `<path d="M12 2a1 1 0 0 1 1 1v5.126a4.002 4.002 0 0 1 0 7.748V21a1 1 0 1 1-2 0v-5.126a4.002 4.002 0 0 1 0-7.748V3a1 1 0 0 1 1-1m0 12a2 2 0 1 0 0-4a2 2 0 0 0 0 4" fill="currentColor"/>`,
+  ],
   [
     "openchamber",
     `<polygon points="12 2.5 3.5 7.4 3.5 17.2 12 22.1 20.5 17.2 20.5 7.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="3.5 7.4 12 12.3 20.5 7.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="12.3" x2="12" y2="22.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="m12 5.5 3.7 2.1L12 9.7 8.3 7.6 12 5.5Zm0 1.5-1 .6 1 .6 1-.6-1-.6Z" fill="currentColor" fill-rule="evenodd"/>`,

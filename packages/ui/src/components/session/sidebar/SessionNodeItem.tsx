@@ -357,6 +357,13 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
   const tooltipProjectLabel = secondaryMeta?.projectLabel
     ?? (projectLabelFromStore ? formatProjectLabel(projectLabelFromStore) : null);
   const tooltipBranchLabel = secondaryMeta?.branchLabel ?? node.worktree?.branch ?? null;
+  const recentLocationLabel = renderContext === 'recent'
+    ? node.worktree
+      ? node.worktree.label?.trim()
+        || node.worktree.name?.trim()
+        || formatDirectoryName(node.worktree.path, null)
+      : t('sessions.sidebar.grouping.projectRoot')
+    : null;
   const prLookupKey = React.useMemo(() => {
     if (isVSCode) return null;
     const branch = node.worktree?.branch?.trim();
@@ -1309,10 +1316,26 @@ function SessionNodeItemComponent(props: Props): React.ReactNode {
                         </span>
                       ) : null}
                     </div>
-                    {showExpandedSessionLayout ? (
-                      <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground/70">
-                        <Icon name="time" className="size-3 flex-shrink-0" />
-                        <span className="truncate" title={formatSessionDateLabel(sessionCreatedTimestamp)}>{sessionCreatedLabel}</span>
+                    {showExpandedSessionLayout && (renderContext !== 'recent' || recentLocationLabel) ? (
+                      <div className={cn(
+                        'flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground/70',
+                        renderContext === 'recent' && !node.worktree && 'text-muted-foreground/50',
+                      )}>
+                        {renderContext === 'recent' ? (
+                          <>
+                            {node.worktree ? (
+                              <Icon name="git-branch" className="size-3 flex-shrink-0" />
+                            ) : (
+                              <Icon name="project-root" className="size-3 flex-shrink-0" />
+                            )}
+                            <span className="truncate" title={recentLocationLabel ?? undefined}>{recentLocationLabel}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Icon name="time" className="size-3 flex-shrink-0" />
+                            <span className="truncate" title={formatSessionDateLabel(sessionCreatedTimestamp)}>{sessionCreatedLabel}</span>
+                          </>
+                        )}
                       </div>
                     ) : null}
                   </button>
