@@ -2101,6 +2101,7 @@ export const dict: Record<I18nKey, string> = {
   'chat.chatInput.previewContextRemove': '移除预览上下文',
   'chat.chatInput.projectRoot': '项目根目录',
   'chat.chatInput.branch': '分支',
+  'chat.chatInput.switchBranch': '切换',
   'chat.chatInput.draftPicker.projectTitle': '项目',
   'chat.chatInput.draftPicker.searchProjects': '搜索项目...',
   'chat.chatInput.draftPicker.searchBranches': '搜索分支...',

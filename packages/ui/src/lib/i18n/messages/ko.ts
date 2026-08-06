@@ -2135,6 +2135,7 @@ export const dict: Record<I18nKey, string> = {
   'chat.chatInput.previewContextRemove': '미리보기 컨텍스트 제거',
   'chat.chatInput.projectRoot': '프로젝트 루트',
   'chat.chatInput.branch': '브랜치',
+  'chat.chatInput.switchBranch': '전환',
   'chat.chatInput.draftPicker.projectTitle': '프로젝트',
   'chat.chatInput.draftPicker.searchProjects': '프로젝트 검색...',
   'chat.chatInput.draftPicker.searchBranches': '브랜치 검색...',

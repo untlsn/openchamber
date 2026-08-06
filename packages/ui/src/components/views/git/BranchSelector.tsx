@@ -33,6 +33,8 @@ interface BranchSelectorProps {
   onCreate: (name: string, remote?: GitRemote) => Promise<void>;
   remotes?: GitRemote[];
   disabled?: boolean;
+  trigger?: React.ReactElement;
+  positionerClassName?: string;
 }
 
 const sanitizeBranchNameInput = (value: string): string => {
@@ -57,6 +59,8 @@ export const BranchSelector: React.FC<BranchSelectorProps> = ({
   onCreate,
   remotes = [],
   disabled = false,
+  trigger,
+  positionerClassName,
 }) => {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -164,18 +168,20 @@ export const BranchSelector: React.FC<BranchSelectorProps> = ({
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 min-w-0 max-w-full justify-start gap-1.5 px-2 py-1"
-              disabled={disabled}
-            >
-              <Icon name="git-branch" className="size-4 text-primary" />
-              <span className="min-w-0 truncate font-medium text-left">
-                {currentBranch || t('gitView.branch.detachedHead')}
-              </span>
-              <Icon name="arrow-down-s" className="size-4 opacity-60" />
-            </Button>
+            {trigger ?? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 min-w-0 max-w-full justify-start gap-1.5 px-2 py-1"
+                disabled={disabled}
+              >
+                <Icon name="git-branch" className="size-4 text-primary" />
+                <span className="min-w-0 truncate font-medium text-left">
+                  {currentBranch || t('gitView.branch.detachedHead')}
+                </span>
+                <Icon name="arrow-down-s" className="size-4 opacity-60" />
+              </Button>
+            )}
           </DropdownMenuTrigger>
         </TooltipTrigger>
         <TooltipContent sideOffset={8}>
@@ -183,7 +189,7 @@ export const BranchSelector: React.FC<BranchSelectorProps> = ({
         </TooltipContent>
       </Tooltip>
 
-      <DropdownMenuContent align="start" className="w-72 p-0 max-h-[60vh] flex flex-col">
+      <DropdownMenuContent align="start" positionerClassName={positionerClassName} className="w-72 p-0 max-h-[60vh] flex flex-col">
         <Command className="h-full min-h-0">
           <CommandInput
             placeholder={t('gitView.branch.searchPlaceholder')}

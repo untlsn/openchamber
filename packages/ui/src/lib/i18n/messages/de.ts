@@ -1974,6 +1974,7 @@ export const dict = {
   'chat.chatInput.previewContextRemove': 'Vorschau-Kontext entfernen',
   'chat.chatInput.projectRoot': 'Projektstamm',
   'chat.chatInput.branch': 'Zweig',
+  'chat.chatInput.switchBranch': 'Wechseln',
   'chat.chatInput.draftPicker.projectTitle': 'Projekt',
   'chat.chatInput.draftPicker.searchProjects': 'Projekte durchsuchen...',
   'chat.chatInput.draftPicker.searchBranches': 'Branches durchsuchen...',

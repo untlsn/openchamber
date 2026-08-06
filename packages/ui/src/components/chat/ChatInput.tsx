@@ -2205,11 +2205,17 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({ onOpenSettings, scrollTo
         selectedDraftBranchLabel,
         selectedDraftBranchIsKnown,
         projectRootBranchOption,
+        draftLocalBranches,
+        draftRemoteBranches,
+        draftBranchInfo,
         worktreeBranchOptions,
         draftBranchItems,
         shouldShowDraftBranchSelector,
         handleDraftProjectChange,
         handleDraftDirectoryChange,
+        handleDraftBranchCheckout,
+        handleDraftBranchCreate,
+        isMutatingDraftBranch,
     } = useDraftTarget(showDraftTargetSelectors);
 
     const chatSurfaceMode = useChatSurfaceMode();
@@ -2469,11 +2475,17 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({ onOpenSettings, scrollTo
                         selectedBranchLabel={selectedDraftBranchLabel}
                         selectedBranchIsKnown={selectedDraftBranchIsKnown}
                         projectRootBranchOption={projectRootBranchOption}
+                        localBranches={draftLocalBranches}
+                        remoteBranches={draftRemoteBranches}
+                        branchInfo={draftBranchInfo}
                         worktreeBranchOptions={worktreeBranchOptions}
                         branchItems={draftBranchItems}
                         showBranchSelector={shouldShowDraftBranchSelector}
                         onProjectChange={handleDraftProjectChange}
                         onDirectoryChange={handleDraftDirectoryChange}
+                        onBranchCheckout={(branch) => { void handleDraftBranchCheckout(branch); }}
+                        onBranchCreate={handleDraftBranchCreate}
+                        isMutatingBranch={isMutatingDraftBranch}
                         theme={currentTheme}
                     />
                 ) : null}
@@ -2857,11 +2869,17 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({ onOpenSettings, scrollTo
                 selectedBranchLabel={selectedDraftBranchLabel}
                 selectedBranchIsKnown={selectedDraftBranchIsKnown}
                 projectRootBranchOption={projectRootBranchOption}
+                localBranches={draftLocalBranches}
+                remoteBranches={draftRemoteBranches}
+                branchInfo={draftBranchInfo}
                 worktreeBranchOptions={worktreeBranchOptions}
                 branchItems={draftBranchItems}
                 showBranchSelector={shouldShowDraftBranchSelector}
                 onProjectChange={handleDraftProjectChange}
                 onDirectoryChange={handleDraftDirectoryChange}
+                onBranchCheckout={(branch) => { void handleDraftBranchCheckout(branch); }}
+                onBranchCreate={handleDraftBranchCreate}
+                isMutatingBranch={isMutatingDraftBranch}
                 theme={currentTheme}
                 openPicker={mobileDraftPicker}
                 onOpenPickerChange={setMobileDraftPicker}

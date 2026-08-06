@@ -2101,6 +2101,7 @@ export const dict: Record<I18nKey, string> = {
   "chat.chatInput.previewContextRemove": "Прибрати контекст перегляду",
   "chat.chatInput.projectRoot": "Корінь проєкту",
   "chat.chatInput.branch": "гілка",
+  "chat.chatInput.switchBranch": "Перемкнути",
   "chat.chatInput.draftPicker.projectTitle": "Проєкт",
   "chat.chatInput.draftPicker.searchProjects": "Пошук проєктів...",
   "chat.chatInput.draftPicker.searchBranches": "Пошук гілок...",

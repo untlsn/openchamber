@@ -2135,6 +2135,7 @@ export const dict = {
   'chat.chatInput.previewContextRemove': 'Remove preview context',
   'chat.chatInput.projectRoot': 'Project root',
   'chat.chatInput.branch': 'Branch',
+  'chat.chatInput.switchBranch': 'Switch',
   'chat.chatInput.draftPicker.projectTitle': 'Project',
   'chat.chatInput.draftPicker.searchProjects': 'Search projects...',
   'chat.chatInput.draftPicker.searchBranches': 'Search branches...',

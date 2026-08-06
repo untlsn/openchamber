@@ -2105,6 +2105,7 @@ export const dict: Record<I18nKey, string> = {
   'chat.chatInput.previewContextRemove': '移除預覽上下文',
   'chat.chatInput.projectRoot': '專案根目錄',
   'chat.chatInput.branch': '分支',
+  'chat.chatInput.switchBranch': '切換',
   'chat.chatInput.draftPicker.projectTitle': '專案',
   'chat.chatInput.draftPicker.searchProjects': '搜尋專案...',
   'chat.chatInput.draftPicker.searchBranches': '搜尋分支...',

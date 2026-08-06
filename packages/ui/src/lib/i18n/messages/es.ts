@@ -2101,6 +2101,7 @@ export const dict: Record<I18nKey, string> = {
   "chat.chatInput.previewContextRemove": "Quitar contexto de vista previa",
   "chat.chatInput.projectRoot": "Raíz del proyecto",
   "chat.chatInput.branch": "Rama",
+  "chat.chatInput.switchBranch": "Cambiar",
   "chat.chatInput.draftPicker.projectTitle": "Proyecto",
   "chat.chatInput.draftPicker.searchProjects": "Buscar proyectos...",
   "chat.chatInput.draftPicker.searchBranches": "Buscar ramas...",

@@ -2134,6 +2134,7 @@ export const dict: Record<I18nKey, string> = {
   'chat.chatInput.previewContextRemove': 'プレビューコンテキストを削除',
   'chat.chatInput.projectRoot': 'プロジェクトルート',
   'chat.chatInput.branch': 'ブランチ',
+  'chat.chatInput.switchBranch': '切り替え',
   'chat.chatInput.draftPicker.projectTitle': 'プロジェクト',
   'chat.chatInput.draftPicker.searchProjects': 'プロジェクトを検索...',
   'chat.chatInput.draftPicker.searchBranches': 'ブランチを検索...',

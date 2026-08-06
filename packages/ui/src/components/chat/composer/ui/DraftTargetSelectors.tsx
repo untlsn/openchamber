@@ -10,14 +10,15 @@
 import React from 'react';
 
 import { Icon } from '@/components/icon/Icon';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MobileOverlayPanel } from '@/components/ui/MobileOverlayPanel';
+import { BranchSelector } from '@/components/views/git/BranchSelector';
 import {
     Select,
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectSeparator,
     SelectTrigger,
     SelectValue,
@@ -42,11 +43,17 @@ export interface DraftTargetProps {
     selectedBranchLabel: string | null;
     selectedBranchIsKnown: boolean;
     projectRootBranchOption: BranchOption | null;
+    localBranches: string[];
+    remoteBranches: string[];
+    branchInfo: Record<string, { ahead?: number; behind?: number }> | undefined;
     worktreeBranchOptions: readonly BranchOption[];
     branchItems: readonly BranchOption[];
     showBranchSelector: boolean;
     onProjectChange: (projectId: string) => void;
     onDirectoryChange: (directory: string) => void;
+    onBranchCheckout: (branch: string) => void;
+    onBranchCreate: (branch: string) => Promise<void>;
+    isMutatingBranch: boolean;
     theme: Theme;
 }
 
@@ -96,11 +103,17 @@ export function DraftTargetSelectors(props: DraftTargetProps) {
         selectedBranchLabel,
         selectedBranchIsKnown,
         projectRootBranchOption,
+        localBranches,
+        remoteBranches,
+        branchInfo,
         worktreeBranchOptions,
         branchItems,
         showBranchSelector,
         onProjectChange,
         onDirectoryChange,
+        onBranchCheckout,
+        onBranchCreate,
+        isMutatingBranch,
         theme,
     } = props;
 
@@ -143,7 +156,29 @@ export function DraftTargetSelectors(props: DraftTargetProps) {
                     <SelectContent className="w-max min-w-48">
                         {projectRootBranchOption ? (
                             <SelectGroup>
-                                <SelectLabel>{t('chat.chatInput.projectRoot')}</SelectLabel>
+                                <div className="flex items-center justify-between gap-3 px-2 py-1.5">
+                                    <span className="text-muted-foreground typography-meta">{t('chat.chatInput.projectRoot')}</span>
+                                    <BranchSelector
+                                        currentBranch={projectRootBranchOption.label}
+                                        localBranches={localBranches}
+                                        remoteBranches={remoteBranches}
+                                        branchInfo={branchInfo}
+                                        onCheckout={onBranchCheckout}
+                                        onCreate={onBranchCreate}
+                                        disabled={isMutatingBranch}
+                                        positionerClassName="z-[130]"
+                                        trigger={(
+                                            <Button
+                                                variant="ghost"
+                                                size="xs"
+                                                disabled={isMutatingBranch}
+                                                onPointerDown={(event) => event.stopPropagation()}
+                                            >
+                                                {t('chat.chatInput.switchBranch')}
+                                            </Button>
+                                        )}
+                                    />
+                                </div>
                                 <SelectItem key={projectRootBranchOption.value} value={projectRootBranchOption.value} className="max-w-[24rem] truncate">
                                     {projectRootBranchOption.label}
                                 </SelectItem>

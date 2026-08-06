@@ -15,8 +15,10 @@
  */
 
 import React from 'react';
+import { toast } from 'sonner';
 
 import { useRuntimeAPIs } from '@/hooks/useRuntimeAPIs';
+import { useI18n } from '@/lib/i18n';
 import { formatDirectoryName } from '@/lib/utils';
 import { useGitBranches, useGitStore, useIsGitRepo } from '@/stores/useGitStore';
 import { useProjectsStore } from '@/stores/useProjectsStore';
@@ -43,6 +45,7 @@ export function getProjectDisplayLabel(project: { label?: string; path: string }
 }
 
 export function useDraftTarget(enabled: boolean) {
+    const { t } = useI18n();
     const projects = useProjectsStore((state) => state.projects) as DraftTargetProject[];
     const activeProjectId = useProjectsStore((state) => state.activeProjectId);
     const setActiveProjectIdOnly = useProjectsStore((state) => state.setActiveProjectIdOnly);
@@ -84,6 +87,7 @@ export function useDraftTarget(enabled: boolean) {
     const hasDraftBranchList = Boolean(selectedDraftProjectBranches?.all);
     const fetchBranches = useGitStore((state) => state.fetchBranches);
     const [isDiscoveringDraftBranches, setIsDiscoveringDraftBranches] = React.useState(false);
+    const [isMutatingDraftBranch, setIsMutatingDraftBranch] = React.useState(false);
 
     React.useEffect(() => {
         if (!enabled || !selectedDraftProjectPath || !runtimeGit || selectedDraftProjectIsGitRepo !== null) {
@@ -128,6 +132,19 @@ export function useDraftTarget(enabled: boolean) {
     }, [fetchBranches, runtimeGit, selectedDraftProject, selectedDraftProjectBranchesFetchedAt, hasDraftBranchList, selectedDraftProjectIsGitRepo, selectedDraftProjectPath, enabled]);
 
     const selectedDraftProjectCurrentBranch = selectedDraftProjectBranches?.current?.trim() ?? '';
+    const draftLocalBranches = React.useMemo(
+        () => (selectedDraftProjectBranches?.all ?? [])
+            .filter((branch) => !branch.startsWith('remotes/'))
+            .sort(),
+        [selectedDraftProjectBranches?.all],
+    );
+    const draftRemoteBranches = React.useMemo(
+        () => (selectedDraftProjectBranches?.all ?? [])
+            .filter((branch) => branch.startsWith('remotes/'))
+            .map((branch) => branch.replace(/^remotes\//, ''))
+            .sort(),
+        [selectedDraftProjectBranches?.all],
+    );
 
     const projectRootBranchOption = React.useMemo(() => {
         if (!selectedDraftProject) {
@@ -280,6 +297,57 @@ export function useDraftTarget(enabled: boolean) {
             directoryOverride: directory,
         }, { force: true });
     }, [selectedDraftProject, setNewSessionDraftTarget]);
+
+    const refreshDraftGitState = React.useCallback(async () => {
+        if (!runtimeGit || !selectedDraftProjectPath) {
+            return;
+        }
+        await Promise.all([
+            fetchGitStatus(selectedDraftProjectPath, runtimeGit, { silent: true }),
+            fetchBranches(selectedDraftProjectPath, runtimeGit),
+        ]);
+    }, [fetchBranches, fetchGitStatus, runtimeGit, selectedDraftProjectPath]);
+
+    const handleDraftBranchCheckout = React.useCallback(async (branch: string) => {
+        if (!runtimeGit || !selectedDraftProjectPath || isMutatingDraftBranch) {
+            return;
+        }
+        const normalized = branch.replace(/^remotes\//, '');
+        if (!normalized || normalized === selectedDraftProjectCurrentBranch) {
+            return;
+        }
+
+        setIsMutatingDraftBranch(true);
+        try {
+            await runtimeGit.checkoutBranch(selectedDraftProjectPath, normalized);
+            await refreshDraftGitState();
+            toast.success(t('gitView.toast.checkedOut', { name: normalized }));
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : t('gitView.toast.checkoutFailed', { name: normalized }));
+        } finally {
+            setIsMutatingDraftBranch(false);
+        }
+    }, [isMutatingDraftBranch, refreshDraftGitState, runtimeGit, selectedDraftProjectCurrentBranch, selectedDraftProjectPath, t]);
+
+    const handleDraftBranchCreate = React.useCallback(async (branch: string) => {
+        if (!runtimeGit || !selectedDraftProjectPath || isMutatingDraftBranch) {
+            return;
+        }
+
+        setIsMutatingDraftBranch(true);
+        try {
+            await runtimeGit.createBranch(selectedDraftProjectPath, branch, selectedDraftProjectCurrentBranch || 'HEAD');
+            await runtimeGit.checkoutBranch(selectedDraftProjectPath, branch);
+            await refreshDraftGitState();
+            toast.success(t('gitView.toast.createdBranch', { name: branch }));
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : t('gitView.toast.createBranchFailed'));
+            throw error;
+        } finally {
+            setIsMutatingDraftBranch(false);
+        }
+    }, [isMutatingDraftBranch, refreshDraftGitState, runtimeGit, selectedDraftProjectCurrentBranch, selectedDraftProjectPath, t]);
+
     return {
         projects,
         selectedDraftProject,
@@ -289,10 +357,16 @@ export function useDraftTarget(enabled: boolean) {
         selectedDraftBranchLabel,
         selectedDraftBranchIsKnown,
         projectRootBranchOption,
+        draftLocalBranches,
+        draftRemoteBranches,
+        draftBranchInfo: selectedDraftProjectBranches?.branches,
         worktreeBranchOptions,
         draftBranchItems,
         shouldShowDraftBranchSelector,
         handleDraftProjectChange,
         handleDraftDirectoryChange,
+        handleDraftBranchCheckout,
+        handleDraftBranchCreate,
+        isMutatingDraftBranch,
     };
 }

@@ -1903,6 +1903,7 @@ export const dict = {
   'chat.chatInput.previewContextRemove': 'Supprimer le contexte d\'aperçu',
   'chat.chatInput.projectRoot': 'Racine du projet',
   'chat.chatInput.branch': 'Bifurquer',
+  'chat.chatInput.switchBranch': 'Changer',
   'chat.chatInput.draftPicker.projectTitle': 'Projet',
   'chat.chatInput.draftPicker.searchProjects': 'Rechercher des projets...',
   'chat.chatInput.draftPicker.searchBranches': 'Rechercher des branches...',
