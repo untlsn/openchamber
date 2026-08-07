@@ -44,6 +44,7 @@ Non-user-visible child processes must never flash a console window.
 - Preserve startup, quit, updater, notification, and deep-link behavior across development and packaged builds.
 - Ensure cleanup tolerates partial startup and repeated shutdown signals.
 - Do not infer readiness from stdout when an in-process callback or returned server handle exists.
+- On this workstation, after building and successfully running `bun run --cwd packages/electron verify:linux-appimage`, atomically replace `~/AppImages/openchamber.appimage` with the newly built native AppImage and ensure it remains executable. Do not replace the installed AppImage when the build or verification fails.
 
 ## Validation
 
